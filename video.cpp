@@ -32,7 +32,9 @@
 
 #include "video.h"
 #include "cap32.h"
+#ifdef HAVE_GL
 #include "SDL_opengl.h"
+#endif
 #include "glfuncs.h"
 #include <math.h>
 
@@ -54,6 +56,9 @@ extern t_CPC CPC;
 // checks for an OpenGL extension
 bool have_gl_extension (char *nom_ext)
 {
+#ifndef HAVE_GL
+return false;
+#else
    const char *ext;
    ext = (const char *) (eglGetString (GL_EXTENSIONS));
    const char *f;
@@ -68,6 +73,7 @@ bool have_gl_extension (char *nom_ext)
       ext += (n + 1);
    }
    return false;
+#endif
 }
 
 // computes the clipping of two rectangles and changes src and dst accordingly
@@ -410,6 +416,7 @@ void double_close()
 /* ------------------------------------------------------------------------------------ */
 /* OpenGL scaling video plugin -------------------------------------------------------- */
 /* ------------------------------------------------------------------------------------ */
+#ifdef HAVE_GL
 static int tex_x,tex_y;
 static GLuint screen_texnum,modulate_texnum;
 static int gl_scanlines;
@@ -729,6 +736,8 @@ void glscale_close()
 	if (eglIsTexture(modulate_texnum))
 		eglDeleteTextures(1,&modulate_texnum);
 }
+
+#endif
 
 /* ------------------------------------------------------------------------------------ */
 /* Super eagle video plugin ----------------------------------------------------------- */
@@ -1800,11 +1809,13 @@ video_plugin video_plugin_list[]=
 {"Software bilinear",			swbilin_init,	swbilin_setpal,	swbilin_lock,		swbilin_unlock,		swbilin_flip,	swbilin_close,		F16_BPP,	1			},
 {"Software bicubic",			swbicub_init,	swbicub_setpal,	swbicub_lock,		swbicub_unlock,		swbicub_flip,	swbicub_close,		F16_BPP,	1			},
 {"Dot matrix",				dotmat_init,	dotmat_setpal,	dotmat_lock,		dotmat_unlock,		dotmat_flip,	dotmat_close,		F16_BPP,	1			},
+#ifdef HAVE_GL
 {"OpenGL scaling",			glscale_init,	glscale_setpal,	glscale_lock,		glscale_unlock,		glscale_flip,	glscale_close,		ALL,		1			},
 {"OpenGL scaling, 25%% scanlines",	glscale25_init,	glscale_setpal,	glscale_lock,		glscale_unlock,		glscale_flip,	glscale_close,		ALL,		1			},
 {"OpenGL scaling, 50%% scanlines",	glscale50_init,	glscale_setpal,	glscale_lock,		glscale_unlock,		glscale_flip,	glscale_close,		ALL,		1			},
 {"OpenGL scaling, 75%% scanlines",	glscale75_init,	glscale_setpal,	glscale_lock,		glscale_unlock,		glscale_flip,	glscale_close,		ALL,		1			},
 {"OpenGL scaling, 100%% scanlines",	glscale100_init,glscale_setpal,	glscale_lock,		glscale_unlock,		glscale_flip,	glscale_close,		ALL,		1			},
+#endif
 {NULL,					NULL,		NULL,		NULL,			NULL,			NULL,		NULL,			0,		0			}
 };
 
